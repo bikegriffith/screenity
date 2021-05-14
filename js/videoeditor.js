@@ -1,3 +1,5 @@
+const SHARE_TEXT = 'Upload to BoxCast';
+
 $(document).ready(function(){
     var blobs = recordedBlobs;
     var player;
@@ -147,6 +149,46 @@ $(document).ready(function(){
         }
     }
     
+    // Upload to BoxCast
+    function saveBoxCast() {
+        $("#share span").html(chrome.i18n.getMessage("saving"));
+        $("#share").css("pointer-events", "none");
+
+        var metadata = {
+            name: 'video.mp4',
+            mimeType: 'video/mp4'
+        };
+        var superBuffer = new Blob(blobs, {
+            type: 'video/mp4'
+        });
+
+        var form = new FormData();
+        form.append('metadata', new Blob([JSON.stringify(metadata)], {type: 'application/json'}));
+        form.append('file', superBuffer);
+
+        alert('Buffer is ready to sent to BoxCast! Just need to log in!');
+        return;
+
+        /*
+        // Upload to Drive
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart');
+        xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+        xhr.responseType = 'json';
+        xhr.onload = () => {
+            var fileId = xhr.response.id;
+            $("#share span").html(SHARE_TEXT);
+            $("#share").css("pointer-events", "all");
+            
+            // Open file in Drive in a new tab
+            chrome.tabs.create({
+                  url: "https://drive.google.com/file/d/"+fileId
+            });
+        };
+        xhr.send(form);
+        */
+    }
+
     // Save on Drive
     function saveDrive() {
         downloaded = true;
@@ -174,7 +216,7 @@ $(document).ready(function(){
             xhr.responseType = 'json';
             xhr.onload = () => {
                 var fileId = xhr.response.id;
-                $("#share span").html("Save to Drive");
+                $("#share span").html(SHARE_TEXT);
                 $("#share").css("pointer-events", "all");
                 
                 // Open file in Drive in a new tab
@@ -239,7 +281,7 @@ $(document).ready(function(){
     
     // Save on Drive
     $("#share").on("click", function(){
-        saveDrive();
+        saveBoxCast();
     });
     
     // Revert changes made to the video
@@ -271,7 +313,7 @@ $(document).ready(function(){
     $("#apply-remove").html(chrome.i18n.getMessage("apply"));
     $("#reset").html(chrome.i18n.getMessage("reset"));
     $("#download-label").html(chrome.i18n.getMessage("download"));
-    $("#share span").html(chrome.i18n.getMessage("save_drive"));
+    // $("#share span").html(chrome.i18n.getMessage("save_drive"));
     $("#apply-trim").html(chrome.i18n.getMessage("apply"));
     
     // Automatically download when closing if the user hasn't downloaded the file
